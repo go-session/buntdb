@@ -1,0 +1,5 @@
+language: go
+sudo: false
+go_import_path: gopkg.in/go-session/buntdb.v1
+go:
+  - 1.7
