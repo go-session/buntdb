@@ -1,6 +1,6 @@
 # BuntDB store for [Session](https://github.com/go-session/session)
 
-[![Build][Build-Status-Image]][Build-Status-Url] [![ReportCard][reportcard-image]][reportcard-url] [![GoDoc][godoc-image]][godoc-url] [![License][license-image]][license-url]
+[![Build][Build-Status-Image]][Build-Status-Url] [![Codecov][codecov-image]][codecov-url] [![ReportCard][reportcard-image]][reportcard-url] [![GoDoc][godoc-image]][godoc-url] [![License][license-image]][license-url]
 
 ## Quick Start
 
@@ -86,6 +86,8 @@ $ ./server
 
 [Build-Status-Url]: https://travis-ci.org/go-session/buntdb
 [Build-Status-Image]: https://travis-ci.org/go-session/buntdb.svg?branch=master
+[codecov-url]: https://codecov.io/gh/go-session/buntdb
+[codecov-image]: https://codecov.io/gh/go-session/buntdb/branch/master/graph/badge.svg
 [reportcard-url]: https://goreportcard.com/report/gopkg.in/go-session/buntdb.v1
 [reportcard-image]: https://goreportcard.com/badge/gopkg.in/go-session/buntdb.v1
 [godoc-url]: https://godoc.org/gopkg.in/go-session/buntdb.v1
