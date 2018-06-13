@@ -7,7 +7,7 @@
 ### Download and install
 
 ```bash
-$ go get -u -v gopkg.in/go-session/buntdb.v1
+$ go get -u -v github.com/go-session/buntdb
 ```
 
 ### Create file `server.go`
@@ -20,15 +20,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"gopkg.in/go-session/buntdb.v1"
-	"gopkg.in/session.v2"
+	"github.com/go-session/buntdb"
+	"github.com/go-session/session"
 )
 
 func main() {
 	session.InitManager(
-		session.SetCookieName("session_id"),
-		session.SetSign([]byte("sign")),
-		session.SetStore(buntdb.NewMemoryStore()),
+		session.SetStore(buntdb.NewFileStore("session.db")),
 	)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -88,9 +86,9 @@ $ ./server
 [Build-Status-Image]: https://travis-ci.org/go-session/buntdb.svg?branch=master
 [codecov-url]: https://codecov.io/gh/go-session/buntdb
 [codecov-image]: https://codecov.io/gh/go-session/buntdb/branch/master/graph/badge.svg
-[reportcard-url]: https://goreportcard.com/report/gopkg.in/go-session/buntdb.v1
-[reportcard-image]: https://goreportcard.com/badge/gopkg.in/go-session/buntdb.v1
-[godoc-url]: https://godoc.org/gopkg.in/go-session/buntdb.v1
-[godoc-image]: https://godoc.org/gopkg.in/go-session/buntdb.v1?status.svg
+[reportcard-url]: https://goreportcard.com/report/github.com/go-session/buntdb
+[reportcard-image]: https://goreportcard.com/badge/github.com/go-session/buntdb
+[godoc-url]: https://godoc.org/github.com/go-session/buntdb
+[godoc-image]: https://godoc.org/github.com/go-session/buntdb?status.svg
 [license-url]: http://opensource.org/licenses/MIT
 [license-image]: https://img.shields.io/npm/l/express.svg

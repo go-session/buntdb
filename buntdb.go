@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-session/session"
 	"github.com/json-iterator/go"
 	"github.com/tidwall/buntdb"
-	"gopkg.in/session.v2"
 )
 
 var (

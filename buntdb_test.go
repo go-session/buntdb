@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/session.v2"
+	"github.com/go-session/session"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
