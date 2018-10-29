@@ -2,19 +2,19 @@ package buntdb
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
 	"github.com/go-session/session"
-	"github.com/json-iterator/go"
 	"github.com/tidwall/buntdb"
 )
 
 var (
 	_             session.ManagerStore = &managerStore{}
 	_             session.Store        = &store{}
-	jsonMarshal                        = jsoniter.Marshal
-	jsonUnmarshal                      = jsoniter.Unmarshal
+	jsonMarshal                        = json.Marshal
+	jsonUnmarshal                      = json.Unmarshal
 )
 
 // NewMemoryStore Create an instance of a memory store
@@ -38,17 +38,11 @@ func NewFileStore(path string) session.ManagerStore {
 func newManagerStore(db *buntdb.DB) *managerStore {
 	return &managerStore{
 		db: db,
-		pool: sync.Pool{
-			New: func() interface{} {
-				return newStore(db)
-			},
-		},
 	}
 }
 
 type managerStore struct {
-	db   *buntdb.DB
-	pool sync.Pool
+	db *buntdb.DB
 }
 
 func (s *managerStore) getValue(sid string) (string, error) {
@@ -91,20 +85,15 @@ func (s *managerStore) Check(_ context.Context, sid string) (bool, error) {
 }
 
 func (s *managerStore) Create(ctx context.Context, sid string, expired int64) (session.Store, error) {
-	store := s.pool.Get().(*store)
-	store.reset(ctx, sid, expired, nil)
-	return store, nil
+	return newStore(ctx, s, sid, expired, nil), nil
 }
 
 func (s *managerStore) Update(ctx context.Context, sid string, expired int64) (session.Store, error) {
-	store := s.pool.Get().(*store)
-
 	value, err := s.getValue(sid)
 	if err != nil {
 		return nil, err
 	} else if value == "" {
-		store.reset(ctx, sid, expired, nil)
-		return store, nil
+		return newStore(ctx, s, sid, expired, nil), nil
 	}
 
 	err = s.db.Update(func(tx *buntdb.Tx) error {
@@ -121,8 +110,7 @@ func (s *managerStore) Update(ctx context.Context, sid string, expired int64) (s
 		return nil, err
 	}
 
-	store.reset(ctx, sid, expired, values)
-	return store, nil
+	return newStore(ctx, s, sid, expired, values), nil
 }
 
 func (s *managerStore) Delete(_ context.Context, sid string) error {
@@ -136,14 +124,11 @@ func (s *managerStore) Delete(_ context.Context, sid string) error {
 }
 
 func (s *managerStore) Refresh(ctx context.Context, oldsid, sid string, expired int64) (session.Store, error) {
-	store := s.pool.Get().(*store)
-
 	value, err := s.getValue(oldsid)
 	if err != nil {
 		return nil, err
 	} else if value == "" {
-		store.reset(ctx, sid, expired, nil)
-		return store, nil
+		return newStore(ctx, s, sid, expired, nil), nil
 	}
 
 	err = s.db.Update(func(tx *buntdb.Tx) error {
@@ -164,17 +149,24 @@ func (s *managerStore) Refresh(ctx context.Context, oldsid, sid string, expired 
 		return nil, err
 	}
 
-	store.reset(ctx, sid, expired, values)
-	return store, nil
+	return newStore(ctx, s, sid, expired, values), nil
 }
 
 func (s *managerStore) Close() error {
 	return s.db.Close()
 }
 
-func newStore(db *buntdb.DB) *store {
+func newStore(ctx context.Context, s *managerStore, sid string, expired int64, values map[string]interface{}) *store {
+	if values == nil {
+		values = make(map[string]interface{})
+	}
+
 	return &store{
-		db: db,
+		db:      s.db,
+		ctx:     ctx,
+		sid:     sid,
+		expired: expired,
+		values:  values,
 	}
 }
 
@@ -185,16 +177,6 @@ type store struct {
 	expired int64
 	db      *buntdb.DB
 	values  map[string]interface{}
-}
-
-func (s *store) reset(ctx context.Context, sid string, expired int64, values map[string]interface{}) {
-	if values == nil {
-		values = make(map[string]interface{})
-	}
-	s.ctx = ctx
-	s.sid = sid
-	s.expired = expired
-	s.values = values
 }
 
 func (s *store) Context() context.Context {
